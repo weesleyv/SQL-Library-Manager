@@ -8,7 +8,7 @@ const asyncHandler = cb => {
     try {
       await cb(req, res, next)
     } catch(error) {
-      res.status(500).send(error);
+      next(error)
     }
   }
 }
@@ -23,20 +23,23 @@ router.get('/', asyncHandler(async (req, res) => {
 
 /* Shows the create new book form */
 router.get('/new', (req, res) => {
-  res.render('new-book');
+  res.render('new-book', {book: {}, title: "New Book"});
 });
 
+/* Shows book detail form */
+router.get('/:id', asyncHandler(async(req, res) => {
+  console.log(req.params.id);
+  const book = await Book.findByPk(req.params.id);
+  res.redner('book-detail', {book, title: book.title});
+}))
+
 /* Posts a new book to the database */
-router.post('/new', asyncHandler( async(req, res) => {
-  // const book = new Book.create(req.body);
+router.post('/', asyncHandler( async(req, res) => {
   console.log(req.body);
+  const book = new Book.create(req.body);
   res.redirect('/books' + book.id)
 }))
 
-/* Shows book detail form */
-router.get('/books/:id', asyncHandler(async(req, res) => {
-
-}))
 
 /* Updates book info in the database */
 router.post('/books/:id', asyncHandler(async(req, res) => {
